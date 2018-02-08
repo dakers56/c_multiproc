@@ -24,13 +24,13 @@ struct shared_queue{
 	int * contents;
 }
 typedef struct shared_queue SHARED_QUEUE;*/
-Q_NODE * new_node();
+Q_NODE * new_node(QUEUE *q);
 int size (QUEUE *q);
 int enqueue(QUEUE *q, Q_NODE *node);
 Q_NODE * dequeue(QUEUE *q);
 void free_q(QUEUE *q);
 int init(QUEUE *q, int size);
-QUEUE * init_sh(int size, int shmfd);
+QUEUE * init_sh(int size, int shmfd_q);
 int share(QUEUE *q, const char* shm_nm);
 void set_next_avail(QUEUE *q, Q_NODE *qn);
 

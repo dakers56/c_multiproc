@@ -10,7 +10,7 @@
 #include<time.h>
 #include <errno.h>
 #include "queue.h"
-#define SHMOBJ_PATH "/shm_sh_q"
+#define SHMOBJ_PATH "/shm_sh_q_1"
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
 //implementing Queue using doubly-linked list
@@ -31,6 +31,7 @@ int main(int argc, char * argv[]){
         return -1;
         }
 	printf("Created shared memory object with FD %d.\n", shmfd);
+	ftruncate(shmfd, sizeof(QUEUE));
 	QUEUE *q = init_sh(1000, shmfd);
 	if(q == NULL){
 		printf("Failed to intialize queue. Errno: %d\n", errno);
@@ -63,7 +64,7 @@ int main(int argc, char * argv[]){
 	}
 	printf("Successfully enqueueed and dequeueed values.\n");
 	*/
-	Q_NODE * n = new_node();
+	Q_NODE * n = new_node(q);
 	return 0;
 }
 int size(QUEUE *q){
@@ -137,17 +138,28 @@ Q_NODE *  dequeue(QUEUE *q){
 	return head_node;
 }
 
-QUEUE * init_sh(int size, int shmfd){
+QUEUE * init_sh(int size, int shmfd_q){
 	printf("Initialzing shared queue.\n");
 	if(size<=0){
         printf("Must specify a max_size >= 0 for queue. Size was %d\n", size);
         return NULL;
         }
-	QUEUE *q = (QUEUE *) mmap(NULL, sizeof(QUEUE), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
-        if(q == -1){
-        handle_error("MMAP failed for queue.\n");
-        return NULL;
+	printf("Mapping memory.\n");
+	printf("Size of queue: %d.\n", sizeof(QUEUE));
+	QUEUE *q = (QUEUE *) mmap(NULL, sizeof(QUEUE), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd_q, 0);
+	if(q == -1){
+        	handle_error("MMAP failed for queue.\n");
+        	return (QUEUE *) NULL;
         }
+	q->contents = malloc(sizeof(char) * size); 
+        if(!(q->contents)){
+	printf("Could not allocate memory for contents of queue.\n");
+	return (Q_NODE *) NULL;
+	}
+	q->empty=1;
+	q->full=0;
+	q->head=(Q_NODE *) NULL;
+	q->tail= (Q_NODE *) NULL;
 	return q;
 }
 
@@ -171,8 +183,17 @@ int share(QUEUE *q, const char* shm_nm){
 	return 0;
 }	
 
-Q_NODE  * new_node(){
-	 return (Q_NODE *) NULL;
+Q_NODE  * new_node(QUEUE * q){
+	 Q_NODE * qn = malloc(sizeof(Q_NODE));
+	 if(!qn){
+		printf("Error allocating queue node\n");
+		return (Q_NODE *) NULL;
+	}
+	qn->q=q;
+	qn->pred=(Q_NODE *) NULL;
+	qn->succ=(Q_NODE *) NULL;
+	qn->val=(char *) NULL;
+	return qn;
 }
 
 //pass *qn=NULL if enqueueing
