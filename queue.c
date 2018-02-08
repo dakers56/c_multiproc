@@ -13,9 +13,14 @@
 #define SHMOBJ_PATH "/shm_sh_q"
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
+//implementing Queue using doubly-linked list
 struct Q_NODE_ {
-	char * ch;
+	QUEUE *q;
+	Q_NODE *pred;
+	Q_NODE *succ;
+	char * val;
 	};
+
 int main(int argc, char * argv[]){
 	printf("Creating new queue.\n");
 	printf("Initializing queue.\n");
@@ -65,20 +70,21 @@ int size(QUEUE *q){
 	return q->head - q->tail;
 }
 
-void enqueue(QUEUE *q, int i){
-	
+int enqueue(QUEUE *q, Q_NODE *node){
 	if(q->empty){
 		printf("Queue was empty\n");
 		q->empty=0;
 	}
-	else {
-	printf("Incrementing q.head.\n");
-	(q->head)++;
-	printf("q->head: %d\n", q->head);
+	if(q->full){
+	printf("Queue was full, could not enqueue.\n");
+	return -1;
 	}
-	printf("Setting value of q.head.\n");
-	*(q->head) = i;
-	printf("Value of q->head: %d\n", *(q->head));
+	printf("Setting successor of current tail to node given to enqueue.\n");
+	node->pred=q->tail;
+	q->tail->succ=node;
+	q->tail=node;
+	set_next_avail(q, (Q_NODE *) NULL);	
+	return 0;
 }
 
 void free_q(QUEUE *q){
@@ -112,26 +118,23 @@ int init(QUEUE *q, int size){
 	return 0;
 }
 
-int dequeue(QUEUE *q){
+Q_NODE *  dequeue(QUEUE *q){
 	printf("Checking if queue is empty.\n");
 	if(q->empty){
 		printf("Queue underflow error: Attempting to dequeue from empty queue.\n");
 		return 0;
 	}
 	printf("Queue was not empty.\n");
-	int val = *(q->head);
-	printf("Val: %d\n", val);
-	if(q->head == q->tail){
+	Q_NODE *  head_node = q->head;
+	printf("Location of head node: %d\n", head_node);
+	q->head=head_node->succ;
+	if(q->head == NULL){
 		printf("Setting q.empty to true.\n");
 		q->empty=1;
 	}
-	else{
-		printf("Decrementing q->head\n");
-		(q->head)--;
-		printf("q->head: %d\n", q->head);
-	}
+	set_next_avail(q, head_node);
 	printf("Returning value.\n");
-	return val;
+	return head_node;
 }
 
 QUEUE * init_sh(int size, int shmfd){
@@ -171,3 +174,26 @@ int share(QUEUE *q, const char* shm_nm){
 Q_NODE  * new_node(){
 	 return (Q_NODE *) NULL;
 }
+
+//pass *qn=NULL if enqueueing
+void set_next_avail(QUEUE *q, Q_NODE *qn){
+	if(q->full){
+	printf("WARNING: queue is full\n.");
+	return;
+	}
+	if(q->empty){
+		printf("Queue was empty. Setting next available to beginning of contents (%d).\n", q->contents);
+		q->next_avail=q->contents;
+		return;
+	}	
+	if (qn != NULL){
+		printf("Setting next available to qn (%d)\n", qn);
+		q->next_avail=qn;
+		return;
+	}
+	printf("q->next_avail before increment: %d\n.", q->next_avail);
+	q->next_avail += 1 * sizeof(QUEUE);
+	printf("q->next_avail after increment: %d\n.", q->next_avail);
+	return;
+	}
+	
