@@ -13,6 +13,9 @@
 #define SHMOBJ_PATH "/shm_sh_q"
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
+struct Q_NODE_ {
+	char * ch;
+	};
 int main(int argc, char * argv[]){
 	printf("Creating new queue.\n");
 	printf("Initializing queue.\n");
@@ -55,6 +58,7 @@ int main(int argc, char * argv[]){
 	}
 	printf("Successfully enqueueed and dequeueed values.\n");
 	*/
+	Q_NODE * n = new_node();
 	return 0;
 }
 int size(QUEUE *q){
@@ -164,4 +168,6 @@ int share(QUEUE *q, const char* shm_nm){
 	return 0;
 }	
 
-
+Q_NODE  * new_node(){
+	 return (Q_NODE *) NULL;
+}
