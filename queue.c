@@ -10,7 +10,9 @@
 #include<time.h>
 #include <errno.h>
 #include "queue.h"
+
 #define SHMOBJ_PATH "/shm_sh_q_1"
+#define SHMOBJ_DATA_PATH "/shm_sh_data"
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
 //implementing Queue using doubly-linked list
@@ -44,36 +46,89 @@ int main(int argc, char * argv[]){
 	Q_NODE * node [3];
 	printf("Initializing new node.\n");
 	node[0]=q->next_avail; 
-	char ** sh_data[]  = {"ABC", "DEF" ,"GHI" };
+
+	
+	char ** sh_data[]  = {"ABC", "DEF" ,"GHI", "JKL", "MNO", "PQR", "STU", "VWX", "YZ" };
+	int sh_data_size = sizeof(sh_data);
+	int shmfd_data = shm_open(SHMOBJ_DATA_PATH, O_CREAT| O_RDWR, 0666);
+	ftruncate(shmfd_data, sh_data_size);
+        if (shmfd == -1){
+        handle_error("shm_open failed for shared data..");
+        return -1;
+        }
+
+	char ** sh_data_map = (char **) mmap(NULL, sh_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd_data, 0); 
+	memcpy(sh_data, sh_data_map, sizeof(sh_data));
+
 	printf("Setting val to %s (addr: %d).\n", sh_data[0], sh_data);
 	node[0]->val=sh_data[0]; 
 	printf("Enqueing node[0]\n.");
 	enqueue(q,sh_data[0]);
+	
+	printf("Forking process.\n");
+	int pid = fork();
+        char *pr_nm;	
+	if(pid == 0) pr_nm = "child";
+	else pr_nm = "parent"; 
+	
 	for(int i = 1; i < len; i++){
+	printf("-------------------\n");
+	printf("Inside %s process\n", pr_nm);
 	printf("Preparing to enqueue node %d.\n", i);
 	printf("Enqueueing node %d.\n", i);
 	enqueue(q, sh_data[i]);
+	printf("-------------------\n");
 	}
+
 	for(int i = 0; i < len; i++){
+		printf("-------------------\n");
+		printf("Inside %s process\n", pr_nm);
 		printf("Dequeuing element %d.\n", i);
 		Q_NODE * qn = dequeue(q);
 		//printf("Dequeued.\n");
 		//printf("qn: %d.\n", qn);
 		//printf("Dequeued value addr: %d.\n", qn->val);
 		printf("Dequeued value: %s.\n", qn->val);
+		printf("-------------------\n");
 	}
-	printf("Unmapping memory.\n");
+/*	
+	printf("%s process joining.\n");
+	join();
+	printf("All processes joined.\n");
+
+*/	
+	if(pid != 0)	{
+	printf("Unmapping memory for queue.\n");
 	int res = munmap(q, sizeof(QUEUE));	
 	if(res){
 	handle_error("Error unmapping memory. ");
 	return -1;
 	}
+
+	printf("Unmapping memor for datay.\n");
+        res = munmap(sh_data_map, sizeof(sh_data_map));
+        if(res){
+        handle_error("Error unmapping memory. ");
+        return -1;
+        }	
+
 	printf("Unlinking %s.\n", SHMOBJ_PATH);
 	res = shm_unlink(SHMOBJ_PATH);
 	 if(res){
         handle_error("Error unlinking shared memory object. ");
         return -1;
         }
+	printf("Unlinking %s.\n", SHMOBJ_DATA_PATH);
+        res = shm_unlink(SHMOBJ_DATA_PATH);
+        if(res){
+        handle_error("Error unlinking shared memory object. ");
+        return -1;
+        }
+	
+}
+	else{
+	printf("Child process finished.\n");
+}
 	return 0;
 }
 int size(QUEUE *q){
