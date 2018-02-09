@@ -25,7 +25,6 @@ static int debug = 0;
 
 int main(int argc, char * argv[]){
 	printf("Creating new queue.\n");
-	//printf("Initializing queue.\n");
 	errno = 0;
 	int shmfd = shm_open(SHMOBJ_PATH, O_CREAT| O_RDWR, 0666);
         if (shmfd == -1){
@@ -46,7 +45,6 @@ int main(int argc, char * argv[]){
 	printf("Initializing new node.\n");
 	node[0]=q->next_avail; 
 	char * ch[]  = {"A", "B" ,"C" };
-	//printf("Setting val to %c (addr: %d).\n", *ch, ch);
 	printf("Setting val to %s (addr: %d).\n", ch[0], ch);
 	node[0]->val=ch[0]; 
 	printf("Enqueing node[0]\n.");
@@ -59,9 +57,9 @@ int main(int argc, char * argv[]){
 	for(int i = 0; i < len; i++){
 		printf("Dequeuing element %d.\n", i);
 		Q_NODE * qn = dequeue(q);
-		printf("Dequeued.\n");
-		printf("qn: %d.\n", qn);
-		printf("Dequeued value addr: %d.\n", qn->val);
+		//printf("Dequeued.\n");
+		//printf("qn: %d.\n", qn);
+		//printf("Dequeued value addr: %d.\n", qn->val);
 		printf("Dequeued value: %s.\n", qn->val);
 	}
 	printf("Unmapping memory.\n");
@@ -84,39 +82,39 @@ int size(QUEUE *q){
 
 int enqueue(QUEUE *q, char * val){
 	if(q->empty){
-		printf("Queue was empty\n");
+		//printf("Queue was empty\n");
 		q->empty=0;
 	}
 	if(q->full){
-	printf("Queue was full, could not enqueue.\n");
+	//printf("Queue was full, could not enqueue.\n");
 	return -1;
 	}
 	(q->occupied)++;
-	printf("q->occupied: %d.\n", q->occupied);
+	//printf("q->occupied: %d.\n", q->occupied);
 	if(q->occupied == q->max_size) {
-	printf("Queue is now full.\n");
+	//printf("Queue is now full.\n");
 	q->full=1;
 	}
-	printf("\n-----------------------------------------------------------\n");
-	printf("q->next_avail: %d.\n", q->next_avail);
+	//printf("\n-----------------------------------------------------------\n");
+	//printf("q->next_avail: %d.\n", q->next_avail);
 	Q_NODE * node = q->next_avail;
-	printf("Setting successor of current tail to node given to enqueue.\n");
-	printf("node->pred: %d.\n", node->pred);
-	printf("q->tail: %d.\n", q->tail);
+	//printf("Setting successor of current tail to node given to enqueue.\n");
+	//printf("node->pred: %d.\n", node->pred);
+	//printf("q->tail: %d.\n", q->tail);
 	node->q=q;
 	node->pred=q->tail;
-	printf("node->pred: %d.\n", node->pred);
+	//printf("node->pred: %d.\n", node->pred);
 	node->succ=NULL;
-	printf("node->succ: %d.\n", node->succ);
-	printf("Setting successor of tail to noded being enqueued.\n");
+	//printf("node->succ: %d.\n", node->succ);
+	//printf("Setting successor of tail to noded being enqueued.\n");
 	q->tail->succ=node;
-	printf("Making new node the tail of the queue.\n");
-	printf("val: %s.\n", val);
+	//printf("Making new node the tail of the queue.\n");
+	//printf("val: %s.\n", val);
 	q->tail=node;
-	printf("Setting val.\n");
+	//printf("Setting val.\n");
 	node->val=val;
-	printf("node->val: %s.\n", node->val); 
-	printf("-----------------------------------------------------------\n");
+	//printf("node->val: %s.\n", node->val); 
+	//printf("-----------------------------------------------------------\n");
 	set_next_avail(q, (Q_NODE *) NULL);	
 	return 0;
 }
@@ -130,68 +128,68 @@ void free_q(QUEUE *q){
 int init(QUEUE *q, int size){
 	int default_size = 10000;
 	if (size <= 0){
-		printf("Allocating default sized queue (%d). Size provided was %d.\n", default_size, size);
+		//printf("Allocating default sized queue (%d). Size provided was %d.\n", default_size, size);
 		size = default_size;
-		printf("Size:  %d.\n", size);
+		//printf("Size:  %d.\n", size);
 	}	
-	printf("\n-----------------------------------------------------------\n");
-	printf("(Before) q.max_size: %d\n",q->max_size);
+	//printf("\n-----------------------------------------------------------\n");
+	//printf("(Before) q.max_size: %d\n",q->max_size);
 	(q->max_size)=size;
-	printf("Queue size: %d\n", q->max_size);
+	//printf("Queue size: %d\n", q->max_size);
 	int * head = malloc(size * sizeof(int));
 	if(!head){
-		printf("Could not allocate integer pointer for queue.head.\n");
+		//printf("Could not allocate integer pointer for queue.head.\n");
 		return 1;
 	}
-	printf("head: %d\n", head);
+	//printf("head: %d\n", head);
 	q->head=head;
 	q->tail=q->head;
-	printf("q->head: %d\n", q->head);
-	printf("q->tail: %d\n", q->tail);
+	//printf("q->head: %d\n", q->head);
+	//printf("q->tail: %d\n", q->tail);
 	q->empty=1;
-	printf("q->empty: %d\n", (int) q->empty);
-	printf("\n-----------------------------------------------------------\n");
+	//printf("q->empty: %d\n", (int) q->empty);
+	//printf("\n-----------------------------------------------------------\n");
 	return 0;
 }
 
 Q_NODE *  dequeue(QUEUE *q){
-	printf("\n-----------------------------------------------------------\n");
-	printf("Checking if queue is empty.\n");
+	//printf("\n-----------------------------------------------------------\n");
+	//printf("Checking if queue is empty.\n");
 	if(q->empty){
-		printf("Queue underflow error: Attempting to dequeue from empty queue.\n");
+		//printf("Queue underflow error: Attempting to dequeue from empty queue.\n");
 		return 0;
 	}
-	printf("Queue was not empty.\n");
+	//printf("Queue was not empty.\n");
 	Q_NODE *  head_node = q->head;
-	printf("q->occupied: %d.\n", q->occupied);
+	//printf("q->occupied: %d.\n", q->occupied);
 	(q->occupied)--;
 	if(q->occupied == 0){
-	printf("Queue is now empty.\n");
+	//printf("Queue is now empty.\n");
 	q->empty = 1;
 	}
-	printf("Location of head node: %d\n", head_node);
+	//printf("Location of head node: %d\n", head_node);
 	if(q->head == q->tail){
-		printf("Setting q.empty to true.\n");
+		//printf("Setting q.empty to true.\n");
 		q->empty=1;
 	}	
 	q->head=head_node->succ;
 	set_next_avail(q, head_node);
-	printf("Returning value.\n");
+	//printf("Returning value.\n");
 	//clean(head_node);
-	printf("\n-----------------------------------------------------------\n");
+	//printf("\n-----------------------------------------------------------\n");
 	return head_node;
 }
 
 QUEUE * init_sh(int size, int shmfd_q){
-	printf("\n-----------------------------------------------------------\n");
-	printf("Initialzing shared queue.\n");
+	//printf("\n-----------------------------------------------------------\n");
+	//printf("Initialzing shared queue.\n");
 	if(size<=0){
-        printf("Must specify a max_size >= 0 for queue. Size was %d\n", size);
+        //printf("Must specify a max_size >= 0 for queue. Size was %d\n", size);
         return NULL;
         }
-	printf("Mapping memory.\n");
-	printf("Size of queue: %d.\n", sizeof(QUEUE));
-	printf("Size of queue node: %d.\n", sizeof(Q_NODE));
+	//printf("Mapping memory.\n");
+	//printf("Size of queue: %d.\n", sizeof(QUEUE));
+	//printf("Size of queue node: %d.\n", sizeof(Q_NODE));
 	QUEUE *q = (QUEUE *) mmap(NULL, sizeof(QUEUE), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd_q, 0);
 	if(q == -1){
         	handle_error("MMAP failed for queue.\n");
@@ -202,14 +200,14 @@ QUEUE * init_sh(int size, int shmfd_q){
 	q->full=0;
 	Q_NODE * head = malloc(size * sizeof(Q_NODE));
 	if(!head){
-	printf("Could not initialize  head for q node.\n");
+	//printf("Could not initialize  head for q node.\n");
 	return NULL;
 	}
 	q->head=head;
 	q->tail=head;
 	q->next_avail=q->head;
 	q->occupied=0;
-	printf("\n-----------------------------------------------------------\n");
+	//printf("\n-----------------------------------------------------------\n");
 	return q;
 }
 
@@ -226,7 +224,7 @@ int share(QUEUE *q, const char* shm_nm){
         return -1;
         }
 
-	printf("Assigning head of queue to mapped memory.\n");
+	//printf("Assigning head of queue to mapped memory.\n");
 	q->head=contents;
 	q->tail=contents;
 	q->empty=1;
@@ -235,35 +233,35 @@ int share(QUEUE *q, const char* shm_nm){
 
 //pass *qn=NULL if enqueueing
 void set_next_avail(QUEUE *q, Q_NODE *qn){
-	printf("-----------------------------------------------------------\n");
+	//printf("-----------------------------------------------------------\n");
 	if(q->full){
-	printf("WARNING: queue is full\n.");
+	//printf("WARNING: queue is full\n.");
 	return;
 	}
 	if(q->empty){
-		printf("Queue was empty. Setting next available to head (%d).\n", q->head);
+		//printf("Queue was empty. Setting next available to head (%d).\n", q->head);
 		q->next_avail=q->head;
 		return;
 	}	
 	if (qn != NULL){
-		printf("Setting next available to qn (%d)\n", qn);
+		//printf("Setting next available to qn (%d)\n", qn);
 		q->next_avail=qn;
 		return;
 	}
-	printf("q->next_avail before increment: %d\n.", q->next_avail);
-	printf("sizeof(Q_NODE) %d\n.", sizeof(Q_NODE));
+	//printf("q->next_avail before increment: %d\n.", q->next_avail);
+	//printf("sizeof(Q_NODE) %d\n.", sizeof(Q_NODE));
 	q->next_avail += (1 * sizeof(Q_NODE));
 	q->next_avail += 1;
-	printf("q->next_avail after increment: %d\n.", q->next_avail);
-	printf("-----------------------------------------------------------\n");
+	//printf("q->next_avail after increment: %d\n.", q->next_avail);
+	//printf("-----------------------------------------------------------\n");
 	return;
 	}
 //Used when dequeueing. Retains value, but clears queue info from node.	
 void clean(Q_NODE *qn){
-	printf("\n-----------------------------------------------------------\n");
-	printf("Cleaning node.\n");
+	//printf("\n-----------------------------------------------------------\n");
+	//printf("Cleaning node.\n");
 	qn->q=NULL;
 	qn->pred=NULL;
 	qn->succ=NULL;
-	printf("\n-----------------------------------------------------------\n");
+	//printf("\n-----------------------------------------------------------\n");
 }
