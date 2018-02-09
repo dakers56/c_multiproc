@@ -18,7 +18,7 @@ struct Q_NODE_ {
 	QUEUE *q;
 	Q_NODE *pred;
 	Q_NODE *succ;
-	char * val;
+	char ** val;
 	};
 
 static int debug = 0;
@@ -44,7 +44,7 @@ int main(int argc, char * argv[]){
 	Q_NODE * node [3];
 	printf("Initializing new node.\n");
 	node[0]=q->next_avail; 
-	char * ch[]  = {"A", "B" ,"C" };
+	char ** ch[]  = {"ABC", "DEF" ,"GHI" };
 	printf("Setting val to %s (addr: %d).\n", ch[0], ch);
 	node[0]->val=ch[0]; 
 	printf("Enqueing node[0]\n.");
