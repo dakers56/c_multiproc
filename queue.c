@@ -66,7 +66,12 @@ int main(int argc, char * argv[]){
 	enqueue(q,sh_data[0]);
 	
 	printf("Forking process.\n");
+
 	int pid = fork();
+	if(pid == -1){
+	handle_error("Fork failed. ");
+	_exit(EXIT_FAILURE);
+	}
         char *pr_nm;	
 	if(pid == 0) pr_nm = "child";
 	else pr_nm = "parent"; 
@@ -127,8 +132,10 @@ int main(int argc, char * argv[]){
 	
 }
 	else{
+	int status;
+	(void) waitpid(pid, &status, 0);
 	printf("Child process finished.\n");
-}
+	}
 	return 0;
 }
 int size(QUEUE *q){
