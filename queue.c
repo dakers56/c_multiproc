@@ -44,15 +44,15 @@ int main(int argc, char * argv[]){
 	Q_NODE * node [3];
 	printf("Initializing new node.\n");
 	node[0]=q->next_avail; 
-	char ** ch[]  = {"ABC", "DEF" ,"GHI" };
-	printf("Setting val to %s (addr: %d).\n", ch[0], ch);
-	node[0]->val=ch[0]; 
+	char ** sh_data[]  = {"ABC", "DEF" ,"GHI" };
+	printf("Setting val to %s (addr: %d).\n", sh_data[0], sh_data);
+	node[0]->val=sh_data[0]; 
 	printf("Enqueing node[0]\n.");
-	enqueue(q,ch[0]);
+	enqueue(q,sh_data[0]);
 	for(int i = 1; i < len; i++){
 	printf("Preparing to enqueue node %d.\n", i);
 	printf("Enqueueing node %d.\n", i);
-	enqueue(q, ch[i]);
+	enqueue(q, sh_data[i]);
 	}
 	for(int i = 0; i < len; i++){
 		printf("Dequeuing element %d.\n", i);
