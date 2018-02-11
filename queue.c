@@ -10,6 +10,7 @@
 #include<time.h>
 #include <errno.h>
 #include "queue.h"
+#include <string.h>
 
 #define SHMOBJ_PATH "/shm_sh_q_1"
 #define SHMOBJ_DATA_PATH "/shm_sh_data"
@@ -20,10 +21,8 @@ struct Q_NODE_ {
 	QUEUE *q;
 	Q_NODE *pred;
 	Q_NODE *succ;
-	char ** val;
+	char * val;
 	};
-
-static int debug = 0;
 
 int main(int argc, char * argv[]){
 	printf("Creating new queue.\n");
@@ -41,15 +40,19 @@ int main(int argc, char * argv[]){
 		return 1;
 	}	
 	printf("Successfully initialized queue.\n");
-	printf("Initializing array of queue nodes.\n");
-	int len = 3;
-	Q_NODE * node [3];
 	printf("Initializing new node.\n");
-	node[0]=q->next_avail; 
 
 	
-	char ** sh_data[]  = {"ABC", "DEF" ,"GHI", "JKL", "MNO", "PQR", "STU", "VWX", "YZ" };
+	char *sh_data[]  = {"ABC", "DEF" ,"GHI", "JKL", "MNO", "PQR", "STU", "VWX", "YZ" };
 	int sh_data_size = sizeof(sh_data);
+	int len = sizeof(sh_data) / sizeof(sh_data[0]);
+
+	printf("Printing elements of array before memcpy.\n");
+	for (int i = 0; i < sizeof(sh_data) / sizeof(sh_data[0]); i++){
+	printf("sh_data[%d]: %s\n", i, *(sh_data + i));
+	}
+	printf("---------------------\n");
+
 	int shmfd_data = shm_open(SHMOBJ_DATA_PATH, O_CREAT| O_RDWR, 0666);
 	ftruncate(shmfd_data, sh_data_size);
         if (shmfd == -1){
@@ -58,16 +61,37 @@ int main(int argc, char * argv[]){
         }
 
 	char ** sh_data_map = (char **) mmap(NULL, sh_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd_data, 0); 
-	memcpy(sh_data, sh_data_map, sizeof(sh_data));
-
-	printf("Setting val to %s (addr: %d).\n", sh_data[0], sh_data);
-	node[0]->val=sh_data[0]; 
-	printf("Enqueing node[0]\n.");
-	enqueue(q,sh_data[0]);
+	//memcpy(sh_data, sh_data_map, sizeof(sh_data)/ sizeof(char));
 	
-	printf("Forking process.\n");
+	printf("Printing elements of array after mmap.\n");
+        for (int i = 0; i < 9; i++){
+        printf("sh_data[%d]: %s\n", i, *(sh_data + i));
+        }
+        printf("---------------------\n");
+        	
+	printf("Printing elements of array from shared memory.\n");
+        for (int i = 0; i < 9; i++){
+	printf("Performing memcpy\n");	
+	printf("sh_data_map + i: %u.\n", sh_data_map + i);
+	printf("sh_data + i: %u.\n", sh_data + i);
+	//memcpy(sh_data_map, sh_data + i, strlen(sh_data + i)); 
+	strcpy(sh_data_map + i, sh_data + i); 
+        printf("sh_data_map[%d]: %s\n", i, *(sh_data_map + i));
+        }
+        printf("---------------------\n");
 
-	int pid = fork();
+	printf("Setting val to %s (addr: %d).\n", *sh_data, sh_data);
+	printf("Enqueing sh_data[0]\n.");
+	printf("q: %u\n", q);
+	printf("sh_data: %u\n", sh_data);
+	printf("*sh_data: %s\n", *sh_data);
+	printf("*(sh_data + 1): %s\n", *(sh_data + 1));
+	enqueue(q, sh_data);
+	
+//	printf("Forking process.\n");
+
+//	int pid = fork();
+	int pid = 1;
 	if(pid == -1){
 	handle_error("Fork failed. ");
 	_exit(EXIT_FAILURE);
@@ -81,7 +105,7 @@ int main(int argc, char * argv[]){
 	printf("Inside %s process\n", pr_nm);
 	printf("Preparing to enqueue node %d.\n", i);
 	printf("Enqueueing node %d.\n", i);
-	enqueue(q, sh_data[i]);
+	enqueue(q, *(sh_data + i));
 	printf("-------------------\n");
 	}
 
@@ -110,7 +134,7 @@ int main(int argc, char * argv[]){
 	return -1;
 	}
 
-	printf("Unmapping memor for datay.\n");
+	printf("Unmapping memory for data.\n");
         res = munmap(sh_data_map, sizeof(sh_data_map));
         if(res){
         handle_error("Error unmapping memory. ");
@@ -143,6 +167,9 @@ int size(QUEUE *q){
 }
 
 int enqueue(QUEUE *q, char * val){
+	printf("address of val: %u\n", val);
+	printf("*val: %c\n", *val);
+	printf("val as string: %s\n", val);
 	if(q->empty){
 		//printf("Queue was empty\n");
 		q->empty=0;
