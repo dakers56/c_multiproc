@@ -15,7 +15,7 @@
 #define SHMOBJ_PATH "/shm_sh_q_1"
 #define SHMOBJ_DATA_PATH "/shm_sh_data"
 
-#define Q_SEM "/q_sem"
+#define Q_SEM "/q_sem_1"
 
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
@@ -91,10 +91,7 @@ int main(int argc, char * argv[]){
 	printf("sh_data: %u\n", sh_data);
 	printf("*sh_data: %s\n", *sh_data);
 	printf("*(sh_data + 1): %s\n", *(sh_data + 1));
-	enqueue(q, sh_data);
-	
-//	printf("Forking process.\n");
-
+	enqueue(q, *sh_data);
 	
 	for(int i = 1; i < len; i++){
 	printf("-------------------\n");
