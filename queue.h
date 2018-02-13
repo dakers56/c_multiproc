@@ -32,5 +32,6 @@ QUEUE * init_sh(int size, int shmfd_q);
 int share(QUEUE *q, const char* shm_nm);
 void set_next_avail(QUEUE *q, Q_NODE *qn);
 void clean(Q_NODE *qn);
+int is_empty(QUEUE *q);
 
 #endif

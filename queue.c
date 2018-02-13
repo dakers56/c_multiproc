@@ -115,7 +115,7 @@ int main(int argc, char * argv[]){
 	if(pid == 0) pr_nm = "child";
 	else pr_nm = "parent"; 
 
-	while(!(q->occupied == 0) || q->full){
+	while(!is_empty(q) || q->full){
 		printf("-------------------\n");
 		printf("Inside %s process\n", pr_nm);
 		printf("Dequeuing element.\n");
@@ -385,3 +385,8 @@ void clean(Q_NODE *qn){
 	qn->succ=NULL;
 	//printf("\n-----------------------------------------------------------\n");
 }
+
+
+int is_empty(QUEUE *q){
+	return q->occupied == 0;
+	}
