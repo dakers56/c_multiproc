@@ -14,6 +14,9 @@
 
 #define SHMOBJ_PATH "/shm_sh_q_1"
 #define SHMOBJ_DATA_PATH "/shm_sh_data"
+
+#define Q_SEM "/q_sem"
+
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
 //implementing Queue using doubly-linked list
@@ -59,6 +62,8 @@ int main(int argc, char * argv[]){
         handle_error("shm_open failed for shared data..");
         return -1;
         }
+	
+	int to_proc = sizeof(sh_data) / sizeof(sh_data[0]);
 
 	char ** sh_data_map = (char **) mmap(NULL, sh_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd_data, 0); 
 	//memcpy(sh_data, sh_data_map, sizeof(sh_data)/ sizeof(char));
@@ -90,8 +95,18 @@ int main(int argc, char * argv[]){
 	
 //	printf("Forking process.\n");
 
-//	int pid = fork();
-	int pid = 1;
+	
+	for(int i = 1; i < len; i++){
+	printf("-------------------\n");
+	printf("Preparing to enqueue node %d.\n", i);
+	printf("Enqueueing node %d.\n", i);
+	enqueue(q, *(sh_data + i));
+	printf("-------------------\n");
+	}
+
+	sem_t *q_sem = sem_open(Q_SEM, O_CREAT, 0666, 1);	
+	int pid = fork();
+//	int pid = 1;
 	if(pid == -1){
 	handle_error("Fork failed. ");
 	_exit(EXIT_FAILURE);
@@ -99,27 +114,29 @@ int main(int argc, char * argv[]){
         char *pr_nm;	
 	if(pid == 0) pr_nm = "child";
 	else pr_nm = "parent"; 
-	
-	for(int i = 1; i < len; i++){
-	printf("-------------------\n");
-	printf("Inside %s process\n", pr_nm);
-	printf("Preparing to enqueue node %d.\n", i);
-	printf("Enqueueing node %d.\n", i);
-	enqueue(q, *(sh_data + i));
-	printf("-------------------\n");
-	}
 
-	for(int i = 0; i < len; i++){
+	while(!(q->occupied == 0) || q->full){
 		printf("-------------------\n");
 		printf("Inside %s process\n", pr_nm);
-		printf("Dequeuing element %d.\n", i);
+		printf("Dequeuing element.\n");
+		printf("%s process waiting on lock.\n", pr_nm);
+		sem_wait(q_sem);
+		printf("%s process obtained lock.\n", pr_nm);
 		Q_NODE * qn = dequeue(q);
 		//printf("Dequeued.\n");
 		//printf("qn: %d.\n", qn);
 		//printf("Dequeued value addr: %d.\n", qn->val);
 		printf("Dequeued value: %s.\n", qn->val);
+		printf("Num occupied: %d.\n", q->occupied);
+		printf("%s process posting to semaphore.\n", pr_nm);
+		sem_post(q_sem);
 		printf("-------------------\n");
 	}
+	char * term_msg;
+	if((q->occupied))
+		term_msg = "Queue was full.\n";
+	else 	term_msg = "All elements consumed from queue.\n";
+	printf(term_msg);
 /*	
 	printf("%s process joining.\n");
 	join();
@@ -153,6 +170,20 @@ int main(int argc, char * argv[]){
         handle_error("Error unlinking shared memory object. ");
         return -1;
         }
+	
+	res = sem_close(q_sem);
+	printf("Closing  queue lock.\n");
+	if (res){
+		handle_error("Error closing semaphore");
+		return -1;
+	}
+	
+	res = sem_unlink(Q_SEM); 
+	if (res) {
+                handle_error("Error unlinking semaphore");	
+		return -1;
+	}
+	printf("Parent process done cleaning up shared resources.\n");
 	
 }
 	else{
