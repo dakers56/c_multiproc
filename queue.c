@@ -11,6 +11,7 @@
 #include <errno.h>
 #include "queue.h"
 #include <string.h>
+#include <math.h>
 
 #define SHMOBJ_PATH "/shm_sh_q_1"
 #define SHMOBJ_DATA_PATH "/shm_sh_data"
@@ -19,6 +20,11 @@
 
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
+
+int n_digs(int a);
+int * digs(int a);
+char * append(char * old, char * new);
+
 //implementing Queue using doubly-linked list
 struct Q_NODE_ {
 	QUEUE *q;
@@ -109,7 +115,14 @@ int main(int argc, char * argv[]){
 	_exit(EXIT_FAILURE);
 	}
         char *pr_nm;	
-	if(pid == 0) pr_nm = "child";
+	int j = 0;
+	int digits = digs(j); 
+	if(pid == 0) {
+		j++;
+		pr_nm = "child";
+		pr_nm = append(pr_nm, digs(j));	
+	}
+		
 	else pr_nm = "parent"; 
 
 	while(!is_empty(q) || q->full){
@@ -386,4 +399,47 @@ void clean(Q_NODE *qn){
 
 int is_empty(QUEUE *q){
 	return q->occupied == 0;
+	}
+
+
+int n_digs(int a){
+	int b = a;
+	if(a < 0){
+	b = -1 * a;
+	}
+	int digs = 1;
+	while((b /= 10) > 0){
+		digs++;
+	}
+	return digs;
+	}
+
+int *digs(int a){
+	int size = n_digs(a);
+	int digs_arr[size];
+	int i = 0;
+	int j = 10;
+	digs_arr[size] = a % 10;
+	while(++i < size){
+	digs_arr[size - 1] =  a / (j *= 10);	
+	}
+	printf("++++++++++++\n");
+	for(int k = 0; k < size; k ++){
+	printf("Digit %d: %d\n", k, digs_arr[k]);
+	}
+	printf("++++++++++++\n");
+	return digs_arr;
+	}
+	
+char * append(char *old, char *new){
+	char * res = malloc(sizeof(old) + sizeof(new) - 1);
+	if(!res){
+	handle_error("Could not append strings");
+	return NULL;
+	}
+	strcpy(res, old);
+	strcpy(res + sizeof(old), new); 
+	printf("++++++++++++\n");
+	printf("After appending: %s\n", res);
+	return res;	
 	}
