@@ -1,17 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <sys/mman.h>
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<unistd.h>
 #include <semaphore.h>
+
 #include <string.h>
 #include <fcntl.h>
 #include<time.h>
 #include <errno.h>
-#include "queue.h"
+
 #include <string.h>
 #include <math.h>
+
+#include "queue.h"
+#include "digits.h"
 
 #define SHMOBJ_PATH "/shm_sh_q_1"
 #define SHMOBJ_DATA_PATH "/shm_sh_data"
