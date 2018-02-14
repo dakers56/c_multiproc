@@ -21,7 +21,7 @@
 #define SHMOBJ_PATH "/shm_sh_q_1"
 #define SHMOBJ_DATA_PATH "/shm_sh_data"
 
-#define Q_SEM "/q_sem_1"
+#define Q_SEM "/q_sem_2"
 
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
@@ -125,7 +125,11 @@ int main(int argc, char * argv[]){
 		
 	else pr_nm = "parent"; 
 
-	while(!is_empty(q) || q->full){
+	printf("%s process waiting on lock for while statement.\n", pr_nm);
+                sem_wait(q_sem);
+	while(1){
+	if(!is_empty(q) || q->full){
+                sem_post(q_sem); //need access to queue for if condition
 		printf("-------------------\n");
 		printf("Inside %s process\n", pr_nm);
 		printf("Dequeuing element.\n");
@@ -141,7 +145,14 @@ int main(int argc, char * argv[]){
 		printf("%s process posting to semaphore.\n", pr_nm);
 		sem_post(q_sem);
 		printf("-------------------\n");
-	}
+		}
+	else {
+                printf("Done consuming from queue - %s process posting to semaphore.\n", pr_nm);
+                sem_post(q_sem); //post for if condition
+                break;  
+               }
+	} //end while
+
 	char * term_msg;
 	if((q->occupied))
 		term_msg = "Queue was full.\n";
