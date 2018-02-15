@@ -34,14 +34,19 @@ int *digits(int a){
 		printf("Error allocating space for digits array.\n");
 		return NULL;
 	}
-	*digs = a % 10;
+	//*digs = a % 10;
+	int *cur = digs + size;
 	int i = 0;
-	while(++i < size){
-	printf("inside while loop.\n");
-	*(digs + i) = (a /= 10) % 10;
-	printf("digs + i: %u.\n", digs + i);
-	printf("*(digs + i): %d.\n", *(digs + i));
-	printf("i: %d.\n", i);
+	while(i < size){
+	//printf("i: %d.\n", i);
+	//printf("a % 10: %d.\n", a % 10);
+	//printf("cur before increment: %d.\n", cur);
+	cur--;
+	//printf("cur after increment: %d.\n", cur - i);
+	*cur  = a % 10;
+	a /= 10;
+	//printf("*(cur): %d.\n", *(cur));
+	i++;
 	} 
 	return digs;	
 }
