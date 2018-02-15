@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "digits.h"
 
-/*
 int main(int argc, char *argv){
 	printf("Testing util functions.\n");
 	int test[] = {123, 4567, 89012};
@@ -17,8 +16,17 @@ int main(int argc, char *argv){
 			printf("%d\n", d[j]);
 		}	
 	}		
+	printf("Testing ch_digits.\n");
+	for(int i = 0; i < size_test; i++){
+		int digs = n_digits(test[i]);
+                char *d = ch_digits(test[i]);
+                printf("Final result of \'ch_digits\': \n");
+                for(int j = 0; j < digs; j++){
+                        printf("%c\n", d[j]);
+                }
+        }
 	return 0;
-}*/
+}
 
 int n_digits(int a){
 	int digs = 1;
@@ -49,4 +57,22 @@ int *digits(int a){
 	i++;
 	} 
 	return digs;	
+}
+
+char *ch_digits(int a){
+	int *int_digs = digits(a);
+	int num_digs = n_digits(a);
+
+	char *as_ch = malloc(num_digs * sizeof(char));	
+	if(!as_ch){
+		printf("Could not allocate memory for character digits.\n");
+		return NULL;
+	}
+
+	for(int i = 0; i < num_digs; i++){
+		*(as_ch + i) = (char) *(int_digs + i) + 48;
+		printf("*(int_digs + i): %d.\n", *(int_digs + i));
+	}
+	
+	return as_ch;	
 }
