@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "digits.h"
 
+/*
 int main(int argc, char *argv){
 	printf("Testing util functions.\n");
 	int test[] = {123, 4567, 89012};
@@ -24,6 +25,7 @@ int main(int argc, char *argv){
         }
 	return 0;
 }
+*/
 
 int n_digits(int a){
 	int digs = 1;
