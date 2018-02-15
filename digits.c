@@ -20,10 +20,7 @@ int main(int argc, char *argv){
 	for(int i = 0; i < size_test; i++){
 		int digs = n_digits(test[i]);
                 char *d = ch_digits(test[i]);
-                printf("Final result of \'ch_digits\': \n");
-                for(int j = 0; j < digs; j++){
-                        printf("%c\n", d[j]);
-                }
+                printf("Final result of \'ch_digits\': %s \n", d);
         }
 	return 0;
 }
@@ -63,7 +60,7 @@ char *ch_digits(int a){
 	int *int_digs = digits(a);
 	int num_digs = n_digits(a);
 
-	char *as_ch = malloc(num_digs * sizeof(char));	
+	char *as_ch = malloc(1 + (num_digs * sizeof(char)));	
 	if(!as_ch){
 		printf("Could not allocate memory for character digits.\n");
 		return NULL;
@@ -73,6 +70,6 @@ char *ch_digits(int a){
 		*(as_ch + i) = (char) *(int_digs + i) + 48;
 		printf("*(int_digs + i): %d.\n", *(int_digs + i));
 	}
-	
+	*(as_ch + num_digs) = '\0';
 	return as_ch;	
 }
