@@ -15,11 +15,23 @@ int main(int argc, char ** argv){
 }
 
 SHARE * new_share(int size){
-	char id = sh_id + '\0';
-	printf("Name: %s.\n", name());
+	char *nm;
+	for (int i = 0; i < 1000; i++){
+	nm = name();
+	printf("Name: %s.\n", nm);
+	free(nm);
+}
 	return NULL;
 }
 
 char *name(){
-	return strcat(sh_name, ch_digits(sh_id++));
+	char *name_cp = malloc(sizeof(sh_name));
+	strcpy(name_cp, sh_name);
+	printf("sh_id: %d.\n", sh_id);
+	printf("ch_digits(sh_id++): %s.\n", ch_digits(sh_id));
+	char *digs=ch_digits(sh_id);
+	strcat(name_cp, digs);
+	free(digs);
+	sh_id++;
+	return name_cp;
 }

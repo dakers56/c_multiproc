@@ -70,7 +70,7 @@ char *ch_digits(int a){
 
 	for(int i = 0; i < num_digs; i++){
 		*(as_ch + i) = (char) *(int_digs + i) + 48;
-		printf("*(int_digs + i): %d.\n", *(int_digs + i));
+	//	printf("*(int_digs + i): %d.\n", *(int_digs + i));
 	}
 	*(as_ch + num_digs) = '\0';
 	return as_ch;	
