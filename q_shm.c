@@ -55,30 +55,41 @@ int main(int argc, char ** argv){
 	printf("Waiting on semaphore.\n");
 	pid_t pid;
 	pid = fork();
+	char *pr_name;
 	if(pid == -1) {
 		printf("Fork failed.\n");
 		return -1;
 	}
 	if (pid == 0){
-		printf("Inside child process.\n");		
+		pr_name = malloc(strlen("child"));
+		strcpy(pr_name, "child");
 	}
 	else{
 	printf("PID: %d.\n", pid);
-	printf("Inside parent process.\n");
+	pr_name = malloc(strlen("parent"));
+	strcpy(pr_name, "parent");
+	}
+	printf("Inside %s process.\n", pr_name);
 	sem_wait(sh_sem);
 	printf("Obtained lock.\n");
-	char *sem_nm = malloc(strlen(sh->sem_nm));
-	destroy(sh, NULL);
+	printf("Doing something...\n");
 	sem_post(sh_sem);
-	printf("Posting to semaphore.\n");
-	sem_close(sh_sem);	
-	printf("Closed semaphore.\n");
-	printf("Unliking semaphore %s.\n", sem_nm);
-	sem_unlink(sem_nm);
-	printf("Unliked semaphore %s.\n", sem_nm);
-	free(sem_nm);
+	printf("%s:posting to semaphore.\n", pr_name);
+	if(strcmp(pr_name,"parent") == 0){ 
+		sem_close(sh_sem);	
+		printf("Closed semaphore.\n");
+		char *sem_nm = malloc(strlen(sh->sem_nm));
+		strcpy(sem_nm, sh->sem_nm);
+		printf("Unliking semaphore %s.\n", sem_nm);
+		sem_unlink(sem_nm);
+		printf("Unliked semaphore %s.\n", sem_nm);
+		free(sem_nm);
+		printf("Destroying shared memory object.\n");
+		destroy(sh, NULL);
 	}
-	printf("Process completed.\n");
+	printf("%s process completed.\n", pr_name);
+	free(pr_name);
+	printf("Done freeing memory.\n");
 	return 0;
 }
 
