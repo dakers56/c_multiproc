@@ -8,5 +8,4 @@ int helper_open(char *path, int oflag,  mode_t mode, int size);
 int helper_open_default(char *path, int size);
 int helper_unlink(char *path);
 
-
 #endif

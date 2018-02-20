@@ -7,7 +7,7 @@
 
 #include "shm_helper.h"
 
-
+/*
 int main(int argc, char **argv){
 	printf("Testing shared memory helper.\n");
 	if (argc != 2){
@@ -21,6 +21,7 @@ int main(int argc, char **argv){
 	
 	
 }
+*/
 
 
 
@@ -30,8 +31,13 @@ int helper_open(char *path, int oflag,  mode_t mode, int size){
 	printf("Shm helper could not open shared memory woth path %s.\n", path);
         return -1;
         }
-        ftruncate(shmfd, size);
+        int fail  = ftruncate(shmfd, size);
+	if(fail){
+		perror("Failed to truncate file.");
+		return -1;
+	}
         printf("Created shared memory object with FD %d.\n", shmfd);
+	return shmfd;
 }
 
 int helper_open_default(char *path, int size){
