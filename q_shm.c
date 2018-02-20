@@ -5,6 +5,7 @@
 #include <errno.h>
 #include<semaphore.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "digits.h"
 #include "q_shm.h"
@@ -14,7 +15,7 @@ char sh_name_base[] = "/Q_SHARE_OBJ_";
 int sh_id = 0;
 
 //char sem_name_base[] =  "/Q_SHARE_OBJ_SEM_";
-char sem_name_base[] =  "/Q1_SEM_";
+char sem_name_base[] =  "/Q2_SEM_";
 int sem_id = 0;
 
 char *name();
@@ -33,6 +34,7 @@ int main(int argc, char ** argv){
 		printf("Error creating share object.\n");
 		return -1;
 	}
+	/*	
 	printf("Successfully created SHARE object.\n");
 	printf("\n--------------------------\n");
 	printf("Attributes of SHARE object.\n");
@@ -48,9 +50,36 @@ int main(int argc, char ** argv){
 	printf("base:  %u.\n", sh->base);
 	printf("next:  %u.\n\n", sh->next);
 	printf("\n--------------------------\n");
-	
+	*/
+	sem_t *sh_sem = get_sem(sh);
+	printf("Waiting on semaphore.\n");
+	pid_t pid;
+	pid = fork();
+	if(pid == -1) {
+		printf("Fork failed.\n");
+		return -1;
+	}
+	if (pid == 0){
+		printf("Inside child process.\n");		
+	}
+	else{
+	printf("PID: %d.\n", pid);
+	printf("Inside parent process.\n");
+	sem_wait(sh_sem);
+	printf("Obtained lock.\n");
+	char *sem_nm = malloc(strlen(sh->sem_nm));
 	destroy(sh, NULL);
-
+	sem_post(sh_sem);
+	printf("Posting to semaphore.\n");
+	sem_close(sh_sem);	
+	printf("Closed semaphore.\n");
+	printf("Unliking semaphore %s.\n", sem_nm);
+	sem_unlink(sem_nm);
+	printf("Unliked semaphore %s.\n", sem_nm);
+	free(sem_nm);
+	}
+	printf("Process completed.\n");
+	return 0;
 }
 
 SHARE * new_share(int size){
@@ -75,7 +104,6 @@ SHARE * new_share(int size){
 	printf("sem name is %s.\n", sem_nm_);
 	new_sh->sem_nm=sem_nm_;
 	printf("Set sem name to %s.\n", new_sh->sem_nm);
-	
 	//TODO: Share name?
 	//char *shmfd_nm =(char *) malloc(sizeof(char) * strlen(name_));
 	
@@ -147,12 +175,21 @@ int destroy(SHARE *sh, sem_t *sem_t_){
 	printf("Waiting on lock.\n");
 	printf("Before sem_wait: sh->sem_t_ = %d\n", sem_t_);
 	fail = sem_wait(sem_t_);
+	if(fail){
+		perror("Error during call to sem_wait");
+		return -1;
+	}
 	printf("After sem_wait: sh->sem_t_ = %d\n", sem_t_);
+	printf("After sem_wait: fail = %d\n", fail);
 	if(fail){
                 perror("sem_wait failed.\n");
                 return -1;
         }
 	printf("Obtained lock.\n");	
+	printf("Posting to semaphore.\n");	
+	printf("Before post: sh->sem_t_ = %d\n", sem_t_);
+	sem_post(sem_t_);
+	printf("Posted to semaphore.");
 	fail = sem_close(sem_t_);
 	if(fail){
                 perror("sem_close failed");
@@ -218,11 +255,14 @@ char *sem_name(){
 	}
 
 sem_t *get_sem(SHARE *sh){
+	/*
         int fail = sem_unlink(sh->sem_nm);
         if(fail){
 		printf("Semaphore already existed.\n");
         }
 	else printf("Created semaphore.\n");
+	*/
+	printf("Created semaphore.\n");
 	sem_t *s = sem_open(sh->sem_nm, O_CREAT, 0666, 1);
 	if(s == SEM_FAILED){
 		perror("Error creating semaphore for SHARE object.\n");
