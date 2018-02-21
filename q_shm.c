@@ -54,6 +54,7 @@ int main(int argc, char ** argv){
 	sem_t *sh_sem = get_sem(sh);
 	printf("Waiting on semaphore.\n");
 	pid_t pid;
+	int wstatus;
 	pid = fork();
 	char *pr_name;
 	if(pid == -1) {
@@ -70,12 +71,19 @@ int main(int argc, char ** argv){
 	strcpy(pr_name, "parent");
 	}
 	printf("Inside %s process.\n", pr_name);
+	if(pid == 0){
 	sem_wait(sh_sem);
 	printf("Obtained lock.\n");
 	printf("Doing something...\n");
 	sem_post(sh_sem);
 	printf("%s:posting to semaphore.\n", pr_name);
+	}
+	//awkward but testing mem copy
 	if(strcmp(pr_name,"parent") == 0){ 
+		do{
+			printf("Parent waiting for child to complete.\n");		
+			sleep(1);
+		} while (!WIFEXITED(wstatus) && !WIFSIGNALED(wstatus));
 		sem_close(sh_sem);	
 		printf("Closed semaphore.\n");
 		char *sem_nm = malloc(strlen(sh->sem_nm));
