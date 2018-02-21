@@ -80,8 +80,11 @@ int main(int argc, char ** argv){
 	}
 	if(ch_pid == 0) {
 		printf("Naming child of child process.\n");
-		char * copy = malloc(strlen(pr_name) + 2);
-		strcpy(copy, pr_name);
+		pr_name  = realloc(pr_name, strlen(pr_name) + 2);
+		if(pr_name == NULL){
+			perror("Could not reallocate space for process name.\n");
+			return -1;
+		}
 		strcat(pr_name, "_2");
 	}
 	sem_wait(sh_sem);
