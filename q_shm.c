@@ -72,6 +72,18 @@ int main(int argc, char ** argv){
 	}
 	printf("Inside %s process.\n", pr_name);
 	if(pid == 0){
+	//create another child process
+	int ch_pid = fork();
+	if(ch_pid == -1) {
+		printf("Error forking child of child process.\n");
+		return -1;
+	}
+	if(ch_pid == 0) {
+		printf("Naming child of child process.\n");
+		char * copy = malloc(strlen(pr_name) + 2);
+		strcpy(copy, pr_name);
+		strcat(pr_name, "_2");
+	}
 	sem_wait(sh_sem);
 	printf("Obtained lock.\n");
 	printf("Doing something...\n");
